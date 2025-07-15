@@ -26,7 +26,7 @@ def check_dependencies():
     
     required_packages = [
         "selenium", "webdriver_manager", "pandas", 
-        "openpyxl", "cohere", "requests"
+        "openpyxl", "google.generativeai", "requests"
     ]
     
     missing_packages = []
@@ -141,11 +141,11 @@ def run_scraper(preferences):
     """Run the scraper with given preferences"""
     print("\n🚀 Starting news scraper...")
     
-    # Get Cohere API key
-    cohere_key = input("\nEnter your Cohere API key: ").strip()
+    # Get Gemini API key
+    gemini_key = input("\nEnter your Gemini API key: ").strip()
     
-    if not cohere_key:
-        print("❌ Cohere API key is required!")
+    if not gemini_key:
+        print("❌ Gemini API key is required!")
         return False
     
     # Setup test mode if needed
@@ -165,17 +165,17 @@ def run_scraper(preferences):
                 config.MAX_ARTICLES = preferences["max_articles"]
                 config.MIN_ARTICLES = min(5, preferences["max_articles"])
             
-            scraper = EnhancedNewsScraperAgent(cohere_key)
+            scraper = EnhancedNewsScraperAgent(gemini_key)
             
         except ImportError as e:
             print(f"❌ Enhanced scraper import failed: {e}")
             print("🔄 Falling back to basic scraper...")
             from news_scraper import NewsScraperAgent
-            scraper = NewsScraperAgent(cohere_key)
+            scraper = NewsScraperAgent(gemini_key)
     else:
         print("🔧 Using basic scraper...")
         from news_scraper import NewsScraperAgent
-        scraper = NewsScraperAgent(cohere_key)
+        scraper = NewsScraperAgent(gemini_key)
     
     # Start scraping
     start_time = datetime.now()

@@ -10,8 +10,8 @@ START_DATE = datetime(2010, 1, 1)
 END_DATE = datetime(2020, 12, 31)
 
 # Article Collection Targets
-MAX_ARTICLES = 1100
-MIN_ARTICLES = 1000
+MAX_ARTICLES = 100
+MIN_ARTICLES = 100
 
 # Output Configuration - Single Excel file for all operations
 EXCEL_FILENAME = "News_Articles_Collection.xlsx"
@@ -94,9 +94,9 @@ CHROME_OPTIONS = [
     "--disable-javascript"  # Remove this if sites require JavaScript
 ]
 
-# Cohere LLM Configuration
-COHERE_CONFIG = {
-    "model": "command-r-plus",
+# Gemini LLM Configuration
+GEMINI_CONFIG = {
+    "model": "gemini-pro",
     "summary_max_tokens": 150,
     "classification_max_tokens": 20,
     "temperature": 0.3

@@ -22,15 +22,27 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException, TimeoutException, NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-import cohere
+import google.generativeai as genai
+from dotenv import load_dotenv
 
 # Import configuration
 from config import *
 
 class EnhancedNewsScraperAgent:
-    def __init__(self, cohere_api_key):
+    def __init__(self, gemini_api_key=None):
         """Initialize the Enhanced News Scraper Agent"""
-        self.cohere_client = cohere.Client(cohere_api_key)
+        # Load .env file
+        load_dotenv()
+        
+        # Get API key from parameter or .env file
+        if gemini_api_key is None:
+            gemini_api_key = os.getenv('GEMINI_API_KEY')
+        
+        if not gemini_api_key:
+            raise ValueError("Gemini API key is required. Please provide it as parameter or set GEMINI_API_KEY in .env file")
+        
+        genai.configure(api_key=gemini_api_key)
+        self.gemini_model = genai.GenerativeModel('gemini-pro')
         self.driver = None
         self.collected_articles = 0
         self.total_errors = 0
@@ -61,17 +73,15 @@ class EnhancedNewsScraperAgent:
         self.logger = logging.getLogger(__name__)
         
     def initialize_excel(self):
-        """Initialize Excel file with proper headers"""
+        """Initialize Excel file with proper headers matching contents news.md structure"""
         headers = [
-            "Name",
-            "Newspaper", 
-            "Published Date",
-            "Article URL",
-            "Headline",
-            "Full Content",
-            "Human Summary",
-            "News Category",
-            "Front Page News"
+            "Name of Newspaper",
+            "Published date of News", 
+            "Enter URL or Link of News",
+            "Headline of News Article",
+            "Content in detail of News article",
+            "Human Summary For Article",
+            "News Category"
         ]
         
         df = pd.DataFrame(columns=headers)
@@ -90,8 +100,27 @@ class EnhancedNewsScraperAgent:
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
             chrome_options.add_experimental_option('useAutomationExtension', False)
             
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+            try:
+                # Try to use system Chrome driver first
+                self.driver = webdriver.Chrome(options=chrome_options)
+            except Exception as e1:
+                try:
+                    # If that fails, try with ChromeDriverManager
+                    service = Service(ChromeDriverManager().install())
+                    self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                except Exception as e2:
+                    # If both fail, try with specific Chrome paths
+                    chrome_paths = [
+                        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+                    ]
+                    for chrome_path in chrome_paths:
+                        if os.path.exists(chrome_path):
+                            chrome_options.binary_location = chrome_path
+                            self.driver = webdriver.Chrome(options=chrome_options)
+                            break
+                    else:
+                        raise Exception(f"Chrome setup failed: {e1}, {e2}")
             self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             
             # Set timeouts
@@ -236,15 +265,13 @@ class EnhancedNewsScraperAgent:
             front_page_indicator = self.assess_front_page_likelihood(headline, full_content)
             
             article_data = {
-                "Name": STUDENT_NAME,
-                "Newspaper": newspaper_name,
-                "Published Date": published_date,
-                "Article URL": article_url,
-                "Headline": headline,
-                "Full Content": full_content,
-                "Human Summary": "",
-                "News Category": "",
-                "Front Page News": front_page_indicator
+                "Name of Newspaper": newspaper_name,
+                "Published date of News": published_date,
+                "Enter URL or Link of News": article_url,
+                "Headline of News Article": headline,
+                "Content in detail of News article": full_content,  # Complete article (very clear data)
+                "Human Summary For Article": "",  # AI-assisted personal summary (50-200 words)
+                "News Category": ""
             }
             
             self.logger.info(f"✅ Article extracted: {headline[:50]}...")
@@ -421,25 +448,19 @@ class EnhancedNewsScraperAgent:
             return "Low likelihood"
             
     def generate_summary_and_topic(self, article_data):
-        """Generate summary and classify topic using Cohere LLM"""
+        """Generate summary and classify topic using Gemini LLM"""
         try:
-            full_content = article_data["Full Content"]
+            full_content = article_data["Content in detail of News article"]
             
-            # Generate summary
-            summary_prompt = f"""Please provide a concise summary of the following Indian news article in exactly {SCRAPING_CONFIG['summary_min_words']}-{SCRAPING_CONFIG['summary_max_words']} words:
+            # Generate human-style summary using AI assistance (50-200 words)
+            summary_prompt = f"""Write a clear, human-style summary of this Indian news article in exactly {SCRAPING_CONFIG['summary_min_words']}-{SCRAPING_CONFIG['summary_max_words']} words. Explain the news in your own words as if you're explaining it to someone. Make it sound natural and conversational, not robotic:
 
 Article: {full_content[:2000]}...
 
-Summary:"""
+Human Summary:"""
 
-            summary_response = self.cohere_client.generate(
-                model=COHERE_CONFIG["model"],
-                prompt=summary_prompt,
-                max_tokens=COHERE_CONFIG["summary_max_tokens"],
-                temperature=COHERE_CONFIG["temperature"]
-            )
-            
-            summary = summary_response.generations[0].text.strip()
+            summary_response = self.gemini_model.generate_content(summary_prompt)
+            human_summary = summary_response.text.strip()
             
             # Classify topic
             topic_prompt = f"""Classify this Indian news article into exactly one of these categories: {', '.join(TOPICS)}
@@ -448,20 +469,14 @@ Article: {full_content[:1000]}...
 
 Return only the category name:"""
 
-            topic_response = self.cohere_client.generate(
-                model=COHERE_CONFIG["model"],
-                prompt=topic_prompt,
-                max_tokens=COHERE_CONFIG["classification_max_tokens"],
-                temperature=0.1
-            )
-            
-            news_category = topic_response.generations[0].text.strip()
+            topic_response = self.gemini_model.generate_content(topic_prompt)
+            news_category = topic_response.text.strip()
             
             # Validate category
             if news_category not in TOPICS:
                 news_category = "National News"
                 
-            article_data["Human Summary"] = summary
+            article_data["Human Summary For Article"] = human_summary
             article_data["News Category"] = news_category
             
             self.logger.info(f"✅ LLM processing completed. Category: {news_category}")
@@ -471,7 +486,7 @@ Return only the category name:"""
             self.logger.error(f"❌ LLM processing failed: {e}")
             self.llm_errors += 1
             
-            article_data["Human Summary"] = "Summary generation failed"
+            article_data["Human Summary For Article"] = "Summary generation failed"
             article_data["News Category"] = "National News"
             
             return article_data
@@ -479,7 +494,7 @@ Return only the category name:"""
     def write_to_excel(self, article_data):
         """Write article data to Excel file"""
         try:
-            if article_data["Article URL"] in self.collected_urls:
+            if article_data["Enter URL or Link of News"] in self.collected_urls:
                 self.logger.warning("⚠️ Duplicate URL detected, skipping...")
                 return False
                 
@@ -493,7 +508,7 @@ Return only the category name:"""
             
             df.to_excel(EXCEL_FILENAME, index=False)
             
-            self.collected_urls.add(article_data["Article URL"])
+            self.collected_urls.add(article_data["Enter URL or Link of News"])
             self.collected_articles += 1
             
             self.logger.info(f"✅ Article saved. Total: {self.collected_articles}")
