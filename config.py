@@ -5,46 +5,54 @@ Modify these settings as needed
 
 from datetime import datetime
 
-# Date Range Configuration
-START_DATE = datetime(2010, 1, 1)
+# Date Range Configuration - Historical News (2000-2020)
+START_DATE = datetime(2000, 1, 1)
 END_DATE = datetime(2020, 12, 31)
 
 # Article Collection Targets
-MAX_ARTICLES = 100
-MIN_ARTICLES = 100
+MAX_ARTICLES = 200
+MIN_ARTICLES = 200
 
 # Output Configuration - Single Excel file for all operations
 EXCEL_FILENAME = "News_Articles_Collection.xlsx"
 ERROR_LOG_FILENAME = "scraper_error_log.txt"
 STUDENT_NAME = "Tejas Subhash Bagal"
 
-# Indian English Newspaper Sources
+# Indian English Newspaper Sources (2000-2020 Historical Collection)
 NEWSPAPER_SOURCES = {
-    "The Times of India": "timesofindia.indiatimes.com",
-    "The Hindu": "thehindu.com", 
-    "The Economic Times": "economictimes.indiatimes.com",
-    "Hindustan Times": "hindustantimes.com",
+    "The Hindu": "thehindu.com",
+    "Hindustan Times": "hindustantimes.com", 
     "Indian Express": "indianexpress.com",
     "The Telegraph": "telegraphindia.com",
-    "Deccan Herald": "deccanherald.com",
-    "Business Standard": "business-standard.com",
-    "Mint": "livemint.com",
-    "DNA": "dnaindia.com",
+    "Deccan Chronicle": "deccanchronicle.com",
     "The New Indian Express": "newindianexpress.com",
+    "Mint": "livemint.com",
+    "Business Standard": "business-standard.com",
+    "Financial Express": "financialexpress.com",
+    "DNA": "dnaindia.com",
+    "The Tribune": "tribuneindia.com",
     "The Statesman": "thestatesman.com",
-    "Outlook": "outlookindia.com",
-    "India Today": "indiatoday.in",
-    "The Wire": "thewire.in",
-    "Scroll": "scroll.in",
-    "FirstPost": "firstpost.com",
-    "News18": "news18.com",
-    "NDTV": "ndtv.com",
-    "The Quint": "thequint.com",
-    "Rediff": "rediff.com",
-    "Zee News": "zeenews.india.com",
-    "CNN-News18": "cnn-news18.com",
-    "Republic World": "republicworld.com",
-    "The Print": "theprint.in"
+    "The Asian Age": "asianage.com",
+    "The Pioneer": "dailypioneer.com",
+    "The Free Press Journal": "freepressjournal.in",
+    "The Economic Times": "economictimes.indiatimes.com",
+    "The Afternoon Despatch & Courier": "afternoondc.in",
+    "The Sentinel": "sentinelassam.com",
+    "The Navhind Times": "navhindtimes.in",
+    "Goa Chronicle": "goachronicleonline.com",
+    "The Assam Tribune": "assamtribune.com",
+    "The Arunachal Times": "arunachaltimes.in",
+    "The Shillong Times": "theshillongtimes.com",
+    "The Imphal Free Press": "ifp.co.in",
+    "The Sikkim Express": "sikkimexpress.com",
+    "The Hans India": "thehansindia.com",
+    "The Orissa Post": "orissapost.com",
+    "The Daily Post": "thedailypost.in",
+    "The Hitavada": "thehitavada.com",
+    "The Meghalaya Guardian": "meghalayaguardian.com",
+    "The Morung Express": "morungexpress.com",
+    "The Sangai Express": "sangaiexpress.com",
+    "The Arunachal Front": "arunachalfront.com"
 }
 
 # News Categories for Classification

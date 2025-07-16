@@ -68,6 +68,7 @@ Basic version:
 ```bash
 python news_scraper.py
 ```
+python simple_news_scraper.py --process-summaries
 
 Enhanced version (recommended):
 ```bash
