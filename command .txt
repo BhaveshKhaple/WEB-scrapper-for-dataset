@@ -1,0 +1,2 @@
+To run python news_scraper.py
+To check python check_new_excel.py
