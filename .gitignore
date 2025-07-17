@@ -64,6 +64,10 @@ EXECUTION_SUMMARY.md
 EXECUTION_COMPLETE.md
 FINAL_CONTENTS_IMPLEMENTATION.md
 contents news.md
+new_excel_file.xlsx
+final_output.xlsx
+output.csv
+continous_news.xlsx
 
 # Test files
 test_*.py
@@ -78,3 +82,4 @@ chromedriver*
 
 # Temp files
 temp_*
+/continuous_news.xlsx

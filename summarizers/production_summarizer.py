@@ -18,7 +18,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('../logs/production_summarizer.log', encoding='utf-8'),
+        logging.FileHandler('c:/Users/yadne/OneDrive - MIT - Chhatrapati Sambhajinagar/Desktop/scrapper/logs/production_summarizer.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -172,10 +172,11 @@ class ProductionSummarizer:
             if 'Summary Status' not in df.columns:
                 df['Summary Status'] = 'NOT_SUMMARIZED'
             
-            if 'AI Summary' not in df.columns:
-                df['AI Summary'] = ''
+            # Ensure Human Summary For Article News column exists
+            if 'Human Summary For Article News' not in df.columns:
+                df['Human Summary For Article News'] = ''
             
-            # Find articles that need summarization
+            # Find articles that need summarization (where Summary Status is NOT_SUMMARIZED)
             unsummarized = df[df['Summary Status'] == 'NOT_SUMMARIZED']
             
             self.logger.info(f"Found {len(unsummarized)} articles to summarize in {filename}")
@@ -204,8 +205,8 @@ class ProductionSummarizer:
                         summary = self.generate_summary(content)
                         
                         if summary:
-                            # Update the dataframe
-                            df.at[idx, 'AI Summary'] = summary
+                            # Update the dataframe - place summary in "Human Summary For Article News" column
+                            df.at[idx, 'Human Summary For Article News'] = summary
                             df.at[idx, 'Summary Status'] = 'SUMMARIZED'
                             
                             results['successful'] += 1

@@ -1,0 +1,5 @@
+outs:
+- md5: 691a02ebb530e4508de756fb0db1ec5f
+  size: 594425
+  hash: md5
+  path: continuous_news.xlsx
