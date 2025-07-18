@@ -211,3 +211,6 @@ For issues or questions:
 1. Check the troubleshooting section
 2. Run `python quick_test.py` to verify setup
 3. Check that all dependencies are installed
+
+
+#created by @bhaveshkhaple
